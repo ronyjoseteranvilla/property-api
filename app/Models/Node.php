@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Node extends Model
 {
@@ -22,4 +24,9 @@ class Node extends Model
         'active'    => 'boolean',
         'move_in_date' => 'date'
     ];
+
+    public function children()
+    {
+        return $this->hasMany(Node::class, 'parent_id');
+    }
 }

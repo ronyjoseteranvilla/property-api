@@ -3,14 +3,28 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Services\API\NodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\API\CreateNodeRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class NodeController extends Controller
 {
-    public function createNode(Request $request): JsonResponse
+    protected $nodeService;
+
+    public function __construct(NodeService $nodeService)
     {
-        return response()->json(['CreateNode', 201], 201);
+        $this->nodeService = $nodeService;
+    }
+
+    public function createNode(CreateNodeRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $node = $this->nodeService->createNode($data);
+
+        return response()->json($node, Response::HTTP_CREATED );
     }
 
     public function changeParent(Request $request, int $id): JsonResponse
@@ -20,6 +34,6 @@ class NodeController extends Controller
 
     public function getChildren(int $id): JsonResponse
     {
-        return response()->json(['getChildren', 200], 200);
+        return response()->json(["getChildren", 200], 200);
     }
 }
