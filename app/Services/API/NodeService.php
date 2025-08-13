@@ -37,9 +37,9 @@ class NodeService
 
         $data['height'] = $parent ? $parent->height + 1 : 0;
 
-        $sanitized_data = $this->sanitizeExtraFields($data);
+        $sanitizedData = $this->sanitizeExtraFields($data);
 
-        return $this->nodeRepository->createNode($sanitized_data);
+        return $this->nodeRepository->createNode($sanitizedData);
     }
 
     /**
@@ -100,9 +100,9 @@ class NodeService
     }
 
     private function validateTenantType(Node $parent, array $data): void{
-        $tenant_count = $parent->children()->where('type', NodeType::TENANT->value)->count();
+        $tenantCount = $parent->children()->where('type', NodeType::TENANT->value)->count();
 
-        if ($tenant_count >=4) abort(422, ' A Tenancy Period type must have at most 4 Tenants.');
+        if ($tenantCount >=4) abort(422, ' A Tenancy Period type must have at most 4 Tenants.');
 
         if (empty($data['moved_in_date'])) abort(422, 'Tenant type must have a moved_in_date');
     }
@@ -110,18 +110,18 @@ class NodeService
     private function sanitizeExtraFields(array $data): array {
 
         $type = $data['type'];
-        $fields_to_validate = ['zip_code', 'monthly_rent', 'active', 'moved_in_date'];
-        $fields_to_keep = [];
+        $fieldsToValidate = ['zip_code', 'monthly_rent', 'active', 'moved_in_date'];
+        $fieldsToKeep = [];
 
-        if ($type === NodeType::BUILDING->value) $fields_to_keep = ['zip_code'];
-        if ($type === NodeType::PROPERTY->value) $fields_to_keep = ['monthly_rent'];
-        if ($type === NodeType::TENANCY_PERIOD->value) $fields_to_keep = ['active'];
-        if ($type === NodeType::TENANT->value) $fields_to_keep = ['active'];
+        if ($type === NodeType::BUILDING->value) $fieldsToKeep = ['zip_code'];
+        if ($type === NodeType::PROPERTY->value) $fieldsToKeep = ['monthly_rent'];
+        if ($type === NodeType::TENANCY_PERIOD->value) $fieldsToKeep = ['active'];
+        if ($type === NodeType::TENANT->value) $fieldsToKeep = ['active'];
 
 
-        foreach ($fields_to_validate as $field_to_validate) {
-            if (!in_array($field_to_validate, $fields_to_keep, true)){
-                $data[$field_to_validate] = null;
+        foreach ($fieldsToValidate as $fieldToValidate) {
+            if (!in_array($fieldToValidate, $fieldsToKeep, true)){
+                $data[$fieldToValidate] = null;
             }
         }
 

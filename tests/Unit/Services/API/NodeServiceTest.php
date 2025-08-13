@@ -27,22 +27,22 @@ class NodeServiceTest extends TestCase
     public function test_create_node_without_parent(): void {
         //Arrange
         $nodeRepositoryMock = $this->mockNodeRepository();
-        $expected_parent_id = 1;
+        $expectedParentId = 1;
 
-        $request_data = [
+        $requestData = [
             'name' => str()->random(10),
             'type' => NodeType::CORPORATION->value,
         ];
 
         $expectedNode = new Node([
-            'id' => $expected_parent_id,
+            'id' => $expectedParentId,
             'type' => NodeType::CORPORATION->value,
             'height' => 0
         ]);
 
-        $expected_request_data = [
-            'name' => $request_data['name'],
-            'type' => $request_data['type'],
+        $expectedRequestData = [
+            'name' => $requestData['name'],
+            'type' => $requestData['type'],
             'height' => 0,
             'zip_code' => null,
             'monthly_rent' => null,
@@ -51,12 +51,12 @@ class NodeServiceTest extends TestCase
         ];
 
         $nodeRepositoryMock->shouldReceive('getNodeById')->never();
-        $nodeRepositoryMock->shouldReceive('createNode')->once()->with($expected_request_data)->andReturn($expectedNode);
+        $nodeRepositoryMock->shouldReceive('createNode')->once()->with($expectedRequestData)->andReturn($expectedNode);
         
         $nodeService = new NodeService($nodeRepositoryMock);
 
         //Act
-        $actualNode = $nodeService->createNode($request_data);
+        $actualNode = $nodeService->createNode($requestData);
 
         //Assert
         $this->assertEquals($expectedNode, $actualNode);
@@ -65,28 +65,28 @@ class NodeServiceTest extends TestCase
     public function test_invalid_parent_type_triggers_exception(): void {
         //Arrange
         $nodeRepositoryMock = $this->mockNodeRepository();
-        $expected_parent_id = 1;
-        $request_data = [
+        $expectedParentId = 1;
+        $requestData = [
             'name' => str()->random(10),
-            'parent_id' => $expected_parent_id,
+            'parent_id' => $expectedParentId,
             'type' => NodeType::BUILDING->value,
             'zip_code' => '12345'
         ];
 
         $invalidParentNode = new Node([
-            'id' => $expected_parent_id,
+            'id' => $expectedParentId,
             'type' => NodeType::TENANT->value,
             'height' => 0
         ]);
 
-        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expected_parent_id)->andReturn($invalidParentNode);
+        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expectedParentId)->andReturn($invalidParentNode);
         $nodeRepositoryMock->shouldReceive('createNode')->never();
 
         $nodeService = new NodeService($nodeRepositoryMock);
 
         //Act | Assert
         try {
-            $nodeService->createNode($request_data);
+            $nodeService->createNode($requestData);
             $this->fail('422 Exception was not thrown');
         } catch (HttpException $exception) {
             $this->assertEquals(422, $exception->getStatusCode());
@@ -98,18 +98,18 @@ class NodeServiceTest extends TestCase
     public function test_tenancy_period_allows_only_one_active(): void {
         //Arrange
         $nodeRepositoryMock = $this->mockNodeRepository();
-        $expected_parent_id = 1;
+        $expectedParentId = 1;
 
-        $request_data = [
+        $requestData = [
             'name' => str()->random(10),
-            'parent_id' => $expected_parent_id,
+            'parent_id' => $expectedParentId,
             'type' => NodeType::TENANCY_PERIOD->value,
             'active' => true,
         ];
 
         $expectedParentNode = Mockery::mock(Node::class)->makePartial();
 
-        $expectedParentNode->id = $expected_parent_id;
+        $expectedParentNode->id = $expectedParentId;
         $expectedParentNode->type = NodeType::PROPERTY->value;
         $expectedParentNode->height = 2;
 
@@ -118,13 +118,13 @@ class NodeServiceTest extends TestCase
         $expectedParentNode->shouldReceive('where')->with('active', true)->andReturnSelf();
         $expectedParentNode->shouldReceive('exists')->andReturn(true);
 
-        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expected_parent_id)->andReturn($expectedParentNode);
+        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expectedParentId)->andReturn($expectedParentNode);
 
         $nodeService = new NodeService($nodeRepositoryMock);
 
         //Act | Assert
         try {
-            $nodeService->createNode($request_data);
+            $nodeService->createNode($requestData);
             $this->fail('422 Exception was not thrown');
         } catch (HttpException $exception) {
             $this->assertEquals(422, $exception->getStatusCode());
@@ -135,19 +135,19 @@ class NodeServiceTest extends TestCase
         public function test_sanitize_extra_fields_removes_irrelevant_values(): void {
         //Arrange
         $nodeRepositoryMock = $this->mockNodeRepository();
-        $expected_parent_id = 1;
+        $expectedParentId = 1;
 
-        $request_data = [
+        $requestData = [
             'name' => str()->random(10),
             'type' => NodeType::BUILDING->value,
-            'parent_id' => $expected_parent_id,
+            'parent_id' => $expectedParentId,
             'zip_code' => '12345',
             'active' => true,
             'monthly_rent' => 10000
         ];
 
         $expectedParentNode = new Node([
-            'id' => $expected_parent_id,
+            'id' => $expectedParentId,
             'name' => str()->random(10),
             'type' => NodeType::CORPORATION->value
         ]);
@@ -155,7 +155,7 @@ class NodeServiceTest extends TestCase
         $expectedNode = new Node([
                 'id'=> 2,
                 'type' => NodeType::BUILDING->value,
-                'parent_id' => $expected_parent_id,
+                'parent_id' => $expectedParentId,
                 'height' => 1,
                 'zip_code' => '12345',
                 'active' => null,
@@ -163,24 +163,24 @@ class NodeServiceTest extends TestCase
 
         ]);
 
-        $expected_request_data = [
-            'name' => $request_data['name'],
-            'type' => $request_data['type'],
-            'parent_id' => $request_data['parent_id'],
+        $expectedRequestData = [
+            'name' => $requestData['name'],
+            'type' => $requestData['type'],
+            'parent_id' => $requestData['parent_id'],
             'height' => 1,
-            'zip_code' => $request_data['zip_code'],
+            'zip_code' => $requestData['zip_code'],
             'monthly_rent' => null,
             'active' => null,
             'moved_in_date' => null,
         ];
 
-        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expected_parent_id)->andReturn($expectedParentNode);
-        $nodeRepositoryMock->shouldReceive('createNode')->once()->with($expected_request_data)->andReturn($expectedNode);
+        $nodeRepositoryMock->shouldReceive('getNodeById')->once()->with($expectedParentId)->andReturn($expectedParentNode);
+        $nodeRepositoryMock->shouldReceive('createNode')->once()->with($expectedRequestData)->andReturn($expectedNode);
 
         $nodeService = new NodeService($nodeRepositoryMock);
 
         //Act
-        $actualNode = $nodeService->createNode($request_data);
+        $actualNode = $nodeService->createNode($requestData);
 
         //Assert
         $this->assertEquals($expectedNode, $actualNode);
@@ -190,11 +190,11 @@ class NodeServiceTest extends TestCase
     {
         //Arrange
         $nodeRepositoryMock = $this->mockNodeRepository();
-        $expected_parent_id = 1;
+        $expectedParentId = 1;
 
         $expectedParentNode = Mockery::mock(Node::class)->makePartial();
 
-        $expectedParentNode->id = $expected_parent_id;
+        $expectedParentNode->id = $expectedParentId;
         $expectedParentNode->type = NodeType::PROPERTY->value;
 
         $expected_child_nodes = Collection::make([
@@ -212,16 +212,16 @@ class NodeServiceTest extends TestCase
             ]),
         ]);
 
-        $nodeRepositoryMock->shouldReceive('getNodeById')->with($expected_parent_id)->andReturn($expectedParentNode);
+        $nodeRepositoryMock->shouldReceive('getNodeById')->with($expectedParentId)->andReturn($expectedParentNode);
         $expectedParentNode->shouldReceive('getAttribute')->with('children')->andReturn($expected_child_nodes);
 
         $nodeService = new NodeService($nodeRepositoryMock);
 
         //Act
-        $actual_child_nodes = $nodeService->getChildren($expected_parent_id);
+        $actualChildNodes = $nodeService->getChildren($expectedParentId);
 
         //Assert
-        $this->assertEquals($expected_child_nodes, $actual_child_nodes);
+        $this->assertEquals($expected_child_nodes, $actualChildNodes);
 
     }
 
