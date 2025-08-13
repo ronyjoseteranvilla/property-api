@@ -8,16 +8,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\API\CreateNodeRequest;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\API\ChangeParentRequest;
 
 class NodeController extends Controller
 {
-    protected $nodeService;
+    protected NodeService $nodeService;
 
     public function __construct(NodeService $nodeService)
     {
         $this->nodeService = $nodeService;
     }
 
+    /**
+     * Summary of createNode
+     * @param \App\Http\Requests\API\CreateNodeRequest $request
+     * @return JsonResponse
+     */
     public function createNode(CreateNodeRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -27,6 +33,11 @@ class NodeController extends Controller
         return response()->json($node, Response::HTTP_CREATED );
     }
 
+    /**
+     * Summary of getChildren
+     * @param int $id
+     * @return JsonResponse
+     */
     public function getChildren(int $id): JsonResponse
     {
         $node = $this->nodeService->getChildren($id);
@@ -34,10 +45,17 @@ class NodeController extends Controller
         return response()->json($node,Response::HTTP_OK);
     }
 
-    public function changeParent(Request $request, int $id): JsonResponse
+    /**
+     * Summary of changeParent
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function changeParent(ChangeParentRequest $request, int $id): JsonResponse
     {
-        return response()->json(['changeParent', 200], 200);
-    }
+        $data = $request->validated();
+        $node = $this->nodeService->changeParent($id, $data['parent_id']);
 
-    
+        return response()->json($node, Response::HTTP_OK);
+    }
 }

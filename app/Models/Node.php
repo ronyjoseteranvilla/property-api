@@ -27,4 +27,9 @@ class Node extends Model
     {
         return $this->hasMany(Node::class, 'parent_id');
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Node::class,'parent_id');
+    }
 }

@@ -26,4 +26,18 @@ class NodeRepository
     {
         return Node::create($data);
     }
+
+    /**
+     * Summary of bulkNodeHeightUpdate
+     * @param array $data
+     * @return void
+     */
+    public function bulkNodeHeightUpdate(array $data): void
+    {
+        Node::upsert(
+            $data,
+            ['id'],
+            ['height']
+        );
+    }
 }
