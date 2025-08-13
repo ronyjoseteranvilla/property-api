@@ -5,6 +5,7 @@ namespace App\Services\API;
 use App\Models\Node;
 use App\Repositories\API\NodeRepository;
 use App\Enums\NodeType;
+use Illuminate\Database\Eloquent\Collection;
 
 class NodeService
 {
@@ -23,6 +24,11 @@ class NodeService
         NodeType::TENANT->value => [NodeType::TENANCY_PERIOD->value],
     ];
 
+    /**
+     * Summary of createNode
+     * @param array $data
+     * @return Node
+     */
     public function createNode(array $data): Node
     {
         $parent = isset($data['parent_id']) ? $this->nodeRepository->getNodeById($data['parent_id']) : null;
@@ -36,9 +42,16 @@ class NodeService
         return $this->nodeRepository->createNode($sanitized_data);
     }
 
-    public function getChildren(array $data)
+    /**
+     * Summary of getChildren
+     * @param int $id
+     * @return Collection<int, Node>
+     */
+    public function getChildren(int $id): Collection
     {
-        //TODO: Add business Logic
+        $node = $this->nodeRepository->getNodeById($id);
+
+        return $node->children;
     }
 
 

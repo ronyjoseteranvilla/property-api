@@ -27,13 +27,17 @@ class NodeController extends Controller
         return response()->json($node, Response::HTTP_CREATED );
     }
 
+    public function getChildren(int $id): JsonResponse
+    {
+        $node = $this->nodeService->getChildren($id);
+
+        return response()->json($node,Response::HTTP_OK);
+    }
+
     public function changeParent(Request $request, int $id): JsonResponse
     {
         return response()->json(['changeParent', 200], 200);
     }
 
-    public function getChildren(int $id): JsonResponse
-    {
-        return response()->json(["getChildren", 200], 200);
-    }
+    
 }

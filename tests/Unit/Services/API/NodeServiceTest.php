@@ -7,6 +7,7 @@ use App\Enums\NodeType;
 use App\Models\Node;
 use App\Repositories\API\NodeRepository;
 use App\Services\API\NodeService;
+use Illuminate\Database\Eloquent\Collection;
 use Mockery;
 use Mockery\MockInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -185,7 +186,44 @@ class NodeServiceTest extends TestCase
         $this->assertEquals($expectedNode, $actualNode);
     }
 
+    public function test_get_node_children(): void 
+    {
+        //Arrange
+        $nodeRepositoryMock = $this->mockNodeRepository();
+        $expected_parent_id = 1;
 
+        $expectedParentNode = Mockery::mock(Node::class)->makePartial();
+
+        $expectedParentNode->id = $expected_parent_id;
+        $expectedParentNode->type = NodeType::PROPERTY->value;
+
+        $expected_child_nodes = Collection::make([
+            new Node([
+                'name' => str()->random(10),
+                'type' => NodeType::BUILDING->value,
+                'id' => 2,
+                'zip_code' => '2000',
+            ]),
+            new Node([
+                'name' => str()->random(10),
+                'type' => NodeType::BUILDING->value,
+                'id' => 3,
+                'zip_code' => '4000',
+            ]),
+        ]);
+
+        $nodeRepositoryMock->shouldReceive('getNodeById')->with($expected_parent_id)->andReturn($expectedParentNode);
+        $expectedParentNode->shouldReceive('getAttribute')->with('children')->andReturn($expected_child_nodes);
+
+        $nodeService = new NodeService($nodeRepositoryMock);
+
+        //Act
+        $actual_child_nodes = $nodeService->getChildren($expected_parent_id);
+
+        //Assert
+        $this->assertEquals($expected_child_nodes, $actual_child_nodes);
+
+    }
 
     
 }
