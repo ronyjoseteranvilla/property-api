@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 class AuthController extends Controller
 {
 
-    protected $authService;
+    protected AuthService $authService;
 
     public function __construct(AuthService $authService)
     {

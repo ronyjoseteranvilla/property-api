@@ -7,7 +7,6 @@ use App\Enums\NodeType;
 use App\Models\Node;
 use App\Repositories\API\NodeRepository;
 use App\Services\API\NodeService;
-use Illuminate\Database\Eloquent\Collection;
 use Mockery;
 use Mockery\MockInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -197,7 +196,7 @@ class NodeServiceTest extends TestCase
         $expectedParentNode->id = $expectedParentId;
         $expectedParentNode->type = NodeType::PROPERTY->value;
 
-        $expected_child_nodes = Collection::make([
+        $expected_child_nodes = collect([
             new Node([
                 'name' => str()->random(10),
                 'type' => NodeType::BUILDING->value,
@@ -224,6 +223,4 @@ class NodeServiceTest extends TestCase
         $this->assertEquals($expected_child_nodes, $actualChildNodes);
 
     }
-
-    
 }

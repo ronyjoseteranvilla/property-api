@@ -5,7 +5,7 @@ use App\Repositories\API\UserRepository;
 use Illuminate\Support\Facades\Auth;
 class AuthService
 {
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
 
     public function __construct(UserRepository $userRepository)
