@@ -1,8 +1,18 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\NodeController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
+
+Route::prefix('v1')->group(function (){
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class,'login']);
+
+    Route::middleware('auth:sanctum')->group(function(){
+        Route::post('/nodes', [NodeController::class, 'createNode']);
+        Route::get('/nodes{id}/children', [NodeController::class,'getChildren']);
+        Route::put('/nodes/{id}/change-parent', [NodeController::class, 'changeParent']);
+    });
+});
